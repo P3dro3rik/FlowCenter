@@ -2,6 +2,7 @@ using FlowCenter.Domain.Entities;
 using FlowCenter.Domain.Enums;
 using FlowCenter.Domain.Exceptions;
 using FluentAssertions;
+using Xunit;
 
 namespace FlowCenter.Tests.Domain.Entities;
 

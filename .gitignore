@@ -1,0 +1,29 @@
+# .NET
+bin/
+obj/
+out/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Testes
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Publicação
+*.pubxml
+*.publishsettings
+
+# Segredos locais (não versionar credenciais)
+appsettings.*.local.json
+secrets.json
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
