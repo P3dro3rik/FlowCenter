@@ -2,7 +2,6 @@ using System.Text.Json.Serialization;
 using FlowCenter.Api.Middlewares;
 using FlowCenter.Application.Interfaces;
 using FlowCenter.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,11 +15,10 @@ builder.Services
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
-// ── Persistência (RNF03, RNF04) ──────────────────────────────────────────────
-builder.Services.AddDbContext<FlowCenterDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddScoped<ITarefaRepository, TarefaRepository>();
+// ── Persistência local em memória (RNF03, RNF04) ─────────────────────────────
+// Sem dependência de banco de dados externo: os dados vivem apenas no processo
+// da aplicação e são perdidos ao reiniciá-la.
+builder.Services.AddSingleton<ITarefaRepository, TarefaRepository>();
 
 // ── Swagger / OpenAPI (RF11, RNF07) ──────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
