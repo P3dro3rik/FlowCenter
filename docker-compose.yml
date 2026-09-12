@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flowcenter-db
+    restart: always
+    environment:
+      POSTGRES_DB: flowcenter_db
+      POSTGRES_USER: flowcenter_user
+      POSTGRES_PASSWORD: flowcenter_password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - flowcenter-network
+
+  api:
+    container_name: flowcenter-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flowcenter_db;Username=flowcenter_user;Password=flowcenter_password123
+    depends_on:
+      - postgres
+    networks:
+      - flowcenter-network
+
+networks:
+  flowcenter-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
