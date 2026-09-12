@@ -1,0 +1,6 @@
+@FlowCenter.API_HostAddress = http://localhost:5285
+
+GET {{FlowCenter.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
