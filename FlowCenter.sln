@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowCenter.Domain", "src\Fl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowCenter.Infrastructure", "src\FlowCenter.Infrastructure\FlowCenter.Infrastructure.csproj", "{B6D001A8-9387-47BF-B968-56652A0CCB3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowCenter.Tests", "tests\FlowCenter.Tests\FlowCenter.Tests.csproj", "{F90F91A0-65D4-4FB0-AC90-0DA969CCB503}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowCenter.Tests", "tests\FlowCenter.Tests.csproj", "{F90F91A0-65D4-FB0AC90-0DA969CCB503}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
