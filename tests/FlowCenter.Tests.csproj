@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>FlowCenter.Tests</RootNamespace>
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\FlowCenter.csproj" />
+    <ProjectReference Include="..\src\FlowCenter.API\FlowCenter.API.csproj" />
+    <ProjectReference Include="..\src\FlowCenter.Application\FlowCenter.Application.csproj" />
+    <ProjectReference Include="..\src\FlowCenter.Domain\FlowCenter.Domain.csproj" />
+    <ProjectReference Include="..\src\FlowCenter.Infrastructure\FlowCenter.Infrastructure.csproj" />
   </ItemGroup>
-
-</Project>
+    
+    </Project>
