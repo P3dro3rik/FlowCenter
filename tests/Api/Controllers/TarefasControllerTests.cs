@@ -1,9 +1,8 @@
-using FlowCenter.Api.Controllers;
+using FlowCenter.API.Controllers;
 using FlowCenter.Application.DTOs;
 using FlowCenter.Domain.Entities;
 using FlowCenter.Domain.Enums;
-using FlowCenter.Domain.Exceptions;
-using FlowCenter.Infrastructure.Persistence;
+using FlowCenter.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
