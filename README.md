@@ -70,3 +70,9 @@ Recurso base: `/api/tarefas`
 | DELETE | `/api/tarefas/{id}`           | Remove uma tarefa                                             |
 
 Detalhes completos dos contratos de entrada/saída e regras de negócio estão em [`docs/SDD.md`](https://github.com/P3dro3rik/FlowCenter/blob/main/docs/SDD.md).
+
+## 🎬 Demonstração
+
+Um roteiro passo a passo para demonstrar a aplicação funcionando (subir via
+Docker Compose, exercitar os 6 endpoints e validar as regras de negócio)
+está em [`docs/DEMO.md`](https://github.com/P3dro3rik/FlowCenter/blob/main/docs/DEMO.md).
