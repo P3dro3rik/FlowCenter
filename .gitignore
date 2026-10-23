@@ -23,6 +23,7 @@ out/
 # Segredos locais (não versionar credenciais)
 appsettings.*.local.json
 secrets.json
+.env
 
 # Sistema operacional
 .DS_Store

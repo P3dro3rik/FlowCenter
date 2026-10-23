@@ -21,6 +21,14 @@ API REST desenvolvida como entrega acadêmica para o gerenciamento centralizado 
 
 ### Executando com Docker Compose
 
+Antes do primeiro `up`, copie o arquivo de exemplo de variáveis de ambiente e
+defina uma senha local para o PostgreSQL (nunca commite o arquivo `.env`):
+
+```
+cp .env.example .env
+# edite .env e defina POSTGRES_PASSWORD
+```
+
 ```
 docker-compose up --build
 ```
@@ -46,7 +54,7 @@ A aplicação sobe por padrão em `http://localhost:5080` e a documentação int
 http://localhost:5080/swagger
 ```
 
-Nesse caso é necessária uma instância do PostgreSQL acessível; ajuste a string de conexão em `src/appsettings.json` (`ConnectionStrings:DefaultConnection`) conforme o seu ambiente.
+Nesse caso é necessária uma instância do PostgreSQL acessível; defina a variável de ambiente `ConnectionStrings__DefaultConnection` com a string de conexão do seu ambiente (nunca a coloque em `appsettings.json`).
 
 ### Executando os testes
 
