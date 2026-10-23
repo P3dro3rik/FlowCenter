@@ -6,9 +6,9 @@ services:
     container_name: flowcenter-db
     restart: always
     environment:
-      POSTGRES_DB: flowcenter_db
-      POSTGRES_USER: flowcenter_user
-      POSTGRES_PASSWORD: flowcenter_password123
+      POSTGRES_DB: ${POSTGRES_DB:-flowcenter_db}
+      POSTGRES_USER: ${POSTGRES_USER:-flowcenter_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD em um arquivo .env (veja .env.example)}
     ports:
       - "5432:5432"
     volumes:
@@ -25,7 +25,7 @@ services:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=flowcenter_db;Username=flowcenter_user;Password=flowcenter_password123
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-flowcenter_db};Username=${POSTGRES_USER:-flowcenter_user};Password=${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD em um arquivo .env (veja .env.example)}
     depends_on:
       - postgres
     networks:
