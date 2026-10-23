@@ -45,7 +45,7 @@ Alternativamente, sem Docker, a API pode ser executada localmente:
 
 ```
 dotnet restore
-dotnet run --project src/FlowCenter.csproj
+dotnet run --project src/FlowCenter.API/FlowCenter.API.csproj
 ```
 
 A aplicação sobe por padrão em `http://localhost:5080` e a documentação interativa (Swagger UI) fica disponível em:
