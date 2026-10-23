@@ -97,6 +97,10 @@ em vez de usar um valor hardcoded.
 - Suíte validada localmente: `dotnet test FlowCenter.sln` → **36/36 testes
   aprovados**, confirmando que o comando agora efetivamente descobre e
   executa a suíte (antes executava 0 testes).
+- Confirmado também no CI real (GitHub Actions) do PR #28: o step
+  "Executar testes unitários" agora reporta `Total tests: 36 / Passed: 36`
+  (antes só exibia "Build succeeded, 0 Warnings, 0 Errors", sem nenhuma
+  contagem de testes).
 
 ---
 
