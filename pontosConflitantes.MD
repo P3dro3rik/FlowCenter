@@ -15,8 +15,8 @@
 
 | # | Item | Status | Branch / PR |
 |---|------|--------|--------------|
-| 1 | Credenciais expostas em texto puro | 🔲 Pendente | `fix/remove-exposed-credentials` (PR a abrir) |
-| 2 | Suíte de testes não compila / CI roda 0 testes (falso verde) | 🔲 Pendente | `fix/consolidate-clean-architecture` (PR a abrir) |
+| 1 | Credenciais expostas em texto puro | ✅ Corrigido (aguardando aprovação) | `fix/remove-exposed-credentials` — PR #27 |
+| 2 | Suíte de testes não compila / CI roda 0 testes (falso verde) | ✅ Corrigido (aguardando aprovação) — 36/36 testes aprovados localmente | `fix/consolidate-clean-architecture` — PR #28 |
 | 3 | SDD atualizado para "As-Built" | 🔲 Pendente | `docs/as-built-sdd` (PR a abrir) |
 | 4 | Material de demonstração funcional | 🔲 Pendente | `docs/demo-material` (PR a abrir) |
 | 5 | Tag de release `v1.0.0` | ⏳ Bloqueado até os PRs acima serem aprovados e mesclados | — |
@@ -33,12 +33,12 @@
 hardcoded em três arquivos versionados no Git. Viola diretamente o requisito
 "sem... credenciais expostas" da Entrega 3.
 
-**Correção planejada:** senha/usuário movidos para variáveis de ambiente lidas de um
-`.env` (gitignorado), com `.env.example` documentando os placeholders; a
-connection string do `appsettings.json` passou a vir de
+**Correção aplicada (PR #27):** senha/usuário movidos para variáveis de
+ambiente lidas de um `.env` (gitignorado), com `.env.example` documentando os
+placeholders; a connection string do `appsettings.json` passou a vir de
 `ConnectionStrings__DefaultConnection` via ambiente; a factory de design-time
-do EF Core passou a ler de variável de ambiente com fallback apenas para uso
-local de desenvolvedor.
+do EF Core agora falha de forma explícita se a variável não estiver definida,
+em vez de usar um valor hardcoded.
 
 ---
 
@@ -68,7 +68,7 @@ local de desenvolvedor.
    Errors" **sem nunca executar um teste** — o pipeline estava verde de forma
    falsa, mascarando o problema nº 1 há várias execuções.
 
-**Correção planejada:**
+**Correção aplicada (PR #28):**
 - Consolidado o código real (regras de negócio RB01–RB12, entidade `Tarefa`
   com `Guid` e setters privados, DTOs, `ITarefaRepository`, controller,
   middleware de exceções) dentro dos projetos corretos da Clean Architecture
@@ -80,18 +80,23 @@ local de desenvolvedor.
 - Atualizado `FlowCenter.API/Program.cs` para registrar `AppDbContext`,
   `ITarefaRepository`, middleware de exceções, Swagger com comentários XML e
   conversão de enums para string em JSON.
+- Regenerada a migration inicial do EF Core para o novo formato de Id
+  (`Guid`, client-generated) da entidade `Tarefa`.
 - Removidos os arquivos e o projeto órfãos (`src/FlowCenter.csproj`,
   `src/Program.cs`, `src/Api`, `src/Application`, `src/Domain`,
-  `src/Properties`, `src/appsettings*.json`) e os scaffolds vazios
-  (`Class1.cs` em Application/Domain/Infrastructure, `src/FlowCenter.Tests`
-  — projeto de teste placeholder que nunca esteve na solução).
+  `src/Infrastructure`, `src/Properties`, `src/appsettings*.json`) e os
+  scaffolds vazios (`Class1.cs` em Application/Domain/Infrastructure,
+  `src/FlowCenter.Tests` — projeto de teste placeholder que nunca esteve na
+  solução, e `tests/UnitTest1.cs`).
 - Corrigido o GUID do projeto de testes em `FlowCenter.sln`.
-- Ajustado `tests/Api/Controllers/TarefasControllerTests.cs` para usar os
-  namespaces/tipos reais (`FlowCenter.Api.Controllers`, `AppDbContext`,
-  `TarefaRepository` do Infrastructure).
-- Suíte validada localmente com `dotnet test` até ficar 100% verde, e
-  confirmado que `dotnet test FlowCenter.sln` agora efetivamente executa os
-  testes (não apenas builda).
+- Ajustado `tests/Api/Controllers/TarefasControllerTests.cs` e
+  `tests/Domain/Entities/TarefaTests.cs` para usar os namespaces/tipos reais
+  (`FlowCenter.Api.Controllers`, `FlowCenter.Domain.Enums`,
+  `FlowCenter.Domain.Exceptions`, `AppDbContext`, `TarefaRepository` do
+  Infrastructure).
+- Suíte validada localmente: `dotnet test FlowCenter.sln` → **36/36 testes
+  aprovados**, confirmando que o comando agora efetivamente descobre e
+  executa a suíte (antes executava 0 testes).
 
 ---
 
