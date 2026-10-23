@@ -17,9 +17,9 @@
 |---|------|--------|--------------|
 | 1 | Credenciais expostas em texto puro | ✅ Corrigido (aguardando aprovação) | `fix/remove-exposed-credentials` — PR #27 |
 | 2 | Suíte de testes não compila / CI roda 0 testes (falso verde) | ✅ Corrigido (aguardando aprovação) — 36/36 testes aprovados localmente | `fix/consolidate-clean-architecture` — PR #28 |
-| 3 | SDD atualizado para "As-Built" | 🔲 Pendente | `docs/as-built-sdd` (PR a abrir) |
-| 4 | Material de demonstração funcional | 🔲 Pendente | `docs/demo-material` (PR a abrir) |
-| 5 | Tag de release `v1.0.0` | ⏳ Bloqueado até os PRs acima serem aprovados e mesclados | — |
+| 3 | SDD atualizado para "As-Built" | ✅ Corrigido (aguardando aprovação) | `docs/as-built-sdd` — PR #29 |
+| 4 | Material de demonstração funcional | ✅ Corrigido (aguardando aprovação) | `docs/demo-material` — PR #30 |
+| 5 | Tag de release `v1.0.0` | ⏳ Bloqueado até os PRs #27, #28, #29, #30 serem aprovados e mesclados | — |
 | 6 | Branch `main` consolidada, sem PRs/conflitos abertos | ✅ Já estava ok (nenhuma ação necessária) | — |
 
 ---
@@ -105,10 +105,13 @@ em vez de usar um valor hardcoded.
 **Problema:** o SDD descrevia decisões (ex.: persistência) que não refletiam
 mais o código final após a consolidação da arquitetura.
 
-**Correção planejada:** seção de persistência/arquitetura do SDD revisada para
-descrever o estado definitivo (Clean Architecture com 4 projetos + testes,
-PostgreSQL via EF Core, Docker Compose), removendo menções ao modelo em
-memória que não é mais usado.
+**Correção aplicada (PR #29):** seção de contratos (8) completada (estava
+cortada no meio de um bloco JSON); adicionada a seção 9 (Arquitetura
+As-Built), documentando os 5 projetos da Clean Architecture; adicionada a
+seção 10 (Relatório de Testes e Evidências), registrando o estado real da
+suíte (36 testes) e uma nota explicando que as capturas de tela da fase
+intermediária mostravam apenas um teste placeholder e um CI que não
+executava a suíte de fato.
 
 ---
 
@@ -117,19 +120,21 @@ memória que não é mais usado.
 **Problema:** não havia roteiro/material para demonstrar a aplicação final
 funcionando.
 
-**Correção planejada:** adicionado roteiro de demonstração (passo a passo: subir via
-Docker Compose, abrir Swagger, exercitar os endpoints RF01–RF08) na
-documentação.
+**Correção aplicada (PR #30):** adicionado `docs/DEMO.md` com roteiro de
+demonstração (passo a passo: subir via Docker Compose, abrir Swagger,
+exercitar os 6 endpoints RF01–RF08 e as validações RB01, RB02, RB09, RB10,
+RB12), com link a partir do README.
 
 ---
 
 ## 5. Tag de release `v1.0.0`
 
-**Pendente.** Só deve ser criada depois que os PRs acima forem revisados e
-mesclados na `main` pelo time — criar a tag antes disso apontaria para um
-commit que ainda não é o "commit final aprovado", violando o próprio
-requisito da Entrega 3. Assim que os PRs forem aprovados e a `main` atualizada,
-criar a tag `v1.0.0` e a release oficial no GitHub.
+**Pendente.** Todas as correções (PRs #27, #28, #29, #30) foram abertas e
+estão aguardando revisão/aprovação do time. A tag só deve ser criada depois
+que esses PRs forem mesclados na `main` — criar a tag antes disso apontaria
+para um commit que ainda não é o "commit final aprovado", violando o
+próprio requisito da Entrega 3. Assim que os PRs forem aprovados e a `main`
+atualizada, criar a tag `v1.0.0` e a release oficial no GitHub.
 
 ---
 
