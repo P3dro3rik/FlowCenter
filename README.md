@@ -37,7 +37,7 @@ Alternativamente, sem Docker, a API pode ser executada localmente:
 
 ```
 dotnet restore
-dotnet run --project src/FlowCenter.csproj
+dotnet run --project src/FlowCenter.API/FlowCenter.API.csproj
 ```
 
 A aplicação sobe por padrão em `http://localhost:5080` e a documentação interativa (Swagger UI) fica disponível em:
@@ -46,7 +46,7 @@ A aplicação sobe por padrão em `http://localhost:5080` e a documentação int
 http://localhost:5080/swagger
 ```
 
-Nesse caso é necessária uma instância do PostgreSQL acessível; ajuste a string de conexão em `src/appsettings.json` (`ConnectionStrings:DefaultConnection`) conforme o seu ambiente.
+Nesse caso é necessária uma instância do PostgreSQL acessível; defina a variável de ambiente `ConnectionStrings__DefaultConnection` com a string de conexão do seu ambiente (nunca a coloque em `appsettings.json`).
 
 ### Executando os testes
 

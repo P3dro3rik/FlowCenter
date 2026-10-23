@@ -1,8 +1,10 @@
-using FlowCenter.API.Controllers;
+using FlowCenter.Api.Controllers;
 using FlowCenter.Application.DTOs;
 using FlowCenter.Domain.Entities;
 using FlowCenter.Domain.Enums;
+using FlowCenter.Domain.Exceptions;
 using FlowCenter.Infrastructure.Data;
+using FlowCenter.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,13 +19,13 @@ namespace FlowCenter.Tests.Api.Controllers;
 /// </summary>
 public class TarefasControllerTests
 {
-    private static TarefasController CriarController(out FlowCenterDbContext context)
+    private static TarefasController CriarController(out AppDbContext context)
     {
-        var options = new DbContextOptionsBuilder<FlowCenterDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        context = new FlowCenterDbContext(options);
+        context = new AppDbContext(options);
         var repository = new TarefaRepository(context);
         return new TarefasController(repository);
     }

@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Tarefa>(entity =>
         {
             entity.HasKey(t => t.Id);
+            entity.Property(t => t.Id).ValueGeneratedNever();
             entity.Property(t => t.Titulo).IsRequired().HasMaxLength(100);
             entity.Property(t => t.Descricao).HasMaxLength(500);
             entity.Property(t => t.Prioridade).HasConversion<string>().IsRequired();
