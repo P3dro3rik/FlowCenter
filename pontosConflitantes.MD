@@ -19,7 +19,7 @@
 | 2 | Suíte de testes não compila / CI roda 0 testes (falso verde) | ✅ Corrigido (aguardando aprovação) — 36/36 testes aprovados localmente | `fix/consolidate-clean-architecture` — PR #28 |
 | 3 | SDD atualizado para "As-Built" | ✅ Corrigido (aguardando aprovação) | `docs/as-built-sdd` — PR #29 |
 | 4 | Material de demonstração funcional | ✅ Corrigido (aguardando aprovação) | `docs/demo-material` — PR #30 |
-| 5 | Tag de release `v1.0.0` | ⏳ Bloqueado até os PRs #27, #28, #29, #30 serem aprovados e mesclados | — |
+| 5 | Tag de release `v1.0.0` | ⏳ PR aberto, **deve ser o ÚLTIMO aprovado** (depende de #27–#30) | `release/v1.0.0` — PR #31 |
 | 6 | Branch `main` consolidada, sem PRs/conflitos abertos | ✅ Já estava ok (nenhuma ação necessária) | — |
 
 ---
@@ -133,12 +133,13 @@ RB12), com link a partir do README.
 
 ## 5. Tag de release `v1.0.0`
 
-**Pendente.** Todas as correções (PRs #27, #28, #29, #30) foram abertas e
-estão aguardando revisão/aprovação do time. A tag só deve ser criada depois
-que esses PRs forem mesclados na `main` — criar a tag antes disso apontaria
-para um commit que ainda não é o "commit final aprovado", violando o
-próprio requisito da Entrega 3. Assim que os PRs forem aprovados e a `main`
-atualizada, criar a tag `v1.0.0` e a release oficial no GitHub.
+**Pendente.** PR de release aberto: `release/v1.0.0` — **PR #31**. Este PR
+adiciona apenas o `CHANGELOG.md` e **deve ser o ÚLTIMO a ser aprovado e
+mesclado**, depois de #27, #28, #29 e #30. Veja o disclaimer na descrição
+do PR #31.
+
+Depois do merge do PR #31, criar a tag `v1.0.0` no commit resultante na
+`main` e publicar a release oficial no GitHub.
 
 ---
 
