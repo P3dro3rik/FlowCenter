@@ -19,11 +19,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\src\FlowCenter.API\FlowCenter.API.csproj" />
-    <ProjectReference Include="..\src\FlowCenter.Application\FlowCenter.Application.csproj" />
-    <ProjectReference Include="..\src\FlowCenter.Domain\FlowCenter.Domain.csproj" />
-    <ProjectReference Include="..\src\FlowCenter.Infrastructure\FlowCenter.Infrastructure.csproj" />
-  </ItemGroup>
-    
-    </Project>
+ <ItemGroup>
+  <ProjectReference Include="..\src\FlowCenter.API\FlowCenter.API.csproj" />
+  <ProjectReference Include="..\src\FlowCenter.Application\FlowCenter.Application.csproj" />
+  <ProjectReference Include="..\src\FlowCenter.Domain\FlowCenter.Domain.csproj" />
+  <ProjectReference Include="..\src\FlowCenter.Infrastructure\FlowCenter.Infrastructure.csproj" />
+</ItemGroup>
+
+</Project>
