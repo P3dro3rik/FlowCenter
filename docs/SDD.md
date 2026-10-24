@@ -151,3 +151,132 @@ O endpoint de listagem poderá receber parâmetros de consulta:
   "descricao": "Criar os endpoints de tarefas",
   "prioridade": "Alta"
 }
+```
+
+**Resposta:** `201 Created`
+```json
+{
+  "id": "b3f1c2a4-1e2d-4f3a-9c1b-7a2e5d6f8c9b",
+  "titulo": "Implementar API",
+  "descricao": "Criar os endpoints de tarefas",
+  "status": "Pendente",
+  "prioridade": "Alta",
+  "dataCriacao": "2026-10-23T12:00:00Z",
+  "dataConclusao": null
+}
+```
+
+Requisições com título ausente ou fora do intervalo de 3–100 caracteres
+(RB01, RB02) resultam em `400 Bad Request`, no formato `ProblemDetails`
+(RB12).
+
+### 8.2 Listar tarefas
+**Requisição:** `GET /api/tarefas` (filtros opcionais `?status=` e
+`?prioridade=`)
+
+**Resposta:** `200 OK`
+```json
+[
+  {
+    "id": "b3f1c2a4-1e2d-4f3a-9c1b-7a2e5d6f8c9b",
+    "titulo": "Implementar API",
+    "descricao": "Criar os endpoints de tarefas",
+    "status": "Pendente",
+    "prioridade": "Alta",
+    "dataCriacao": "2026-10-23T12:00:00Z",
+    "dataConclusao": null
+  }
+]
+```
+
+### 8.3 Consultar tarefa por id
+**Requisição:** `GET /api/tarefas/{id}`
+
+**Resposta:** `200 OK` com o mesmo formato do item 8.1, ou `404 Not Found`
+caso o identificador não exista (RB09).
+
+### 8.4 Atualizar tarefa
+**Requisição:** `PUT /api/tarefas/{id}`
+```json
+{
+  "titulo": "Implementar API (revisado)",
+  "descricao": "Nova descrição",
+  "prioridade": "Media"
+}
+```
+
+**Resposta:** `200 OK` com a tarefa atualizada, `400 Bad Request` para dados
+inválidos (RB01, RB02) ou `404 Not Found` caso a tarefa não exista.
+
+### 8.5 Concluir tarefa
+**Requisição:** `PATCH /api/tarefas/{id}/concluir`
+
+**Resposta:** `200 OK` com a tarefa marcada como `Concluida` e
+`dataConclusao` preenchida (RB07), ou `404 Not Found`.
+
+### 8.6 Excluir tarefa
+**Requisição:** `DELETE /api/tarefas/{id}`
+
+**Resposta:** `204 No Content`, ou `404 Not Found` caso a tarefa não exista.
+
+---
+
+## 9. Arquitetura (As-Built)
+
+O FlowCenter adota Clean Architecture, organizada em quatro projetos sob
+`src/`, mais o projeto de testes em `tests/`:
+
+| Projeto | Responsabilidade |
+|---|---|
+| `FlowCenter.Domain` | Entidade `Tarefa` e suas regras de negócio (RB01–RB12), enums (`StatusTarefa`, `PrioridadeTarefa`) e `DomainException`. Não depende de nenhum outro projeto. |
+| `FlowCenter.Application` | Contratos de entrada/saída (DTOs) e a interface `ITarefaRepository`. Depende apenas de `FlowCenter.Domain`. |
+| `FlowCenter.Infrastructure` | Persistência via EF Core/PostgreSQL: `AppDbContext`, migrations e a implementação concreta `TarefaRepository` (RNF03, RNF04). Depende de `FlowCenter.Domain` e `FlowCenter.Application`. |
+| `FlowCenter.API` | `Program.cs` (composição/DI), `TarefasController` e o middleware global de tratamento de exceções. Depende de `FlowCenter.Application` e `FlowCenter.Infrastructure`. |
+| `FlowCenter.Tests` (em `tests/`) | Testes xUnit + FluentAssertions cobrindo as regras de domínio e os endpoints do controller com o provedor InMemory do EF Core. |
+
+A dependência flui sempre em uma direção — `API → Application/Infrastructure
+→ Domain` — sem referências circulares.
+
+A execução padronizada é feita via Docker Compose (`docker-compose.yml` +
+`Dockerfile`), subindo a API e um container PostgreSQL. As credenciais do
+banco são fornecidas por variável de ambiente (`.env`, não versionado — veja
+`.env.example`), nunca hardcoded no código ou nos arquivos de configuração.
+
+---
+
+## 10. Relatório de Testes e Evidências
+
+### 10.1 Estado atual
+
+A suíte de testes (`tests/FlowCenter.Tests.csproj`) cobre as regras de
+negócio do domínio (RB01–RB12) e os oito endpoints do controller
+(RF01–RF08), totalizando **36 testes**, todos aprovados
+(`dotnet test FlowCenter.sln`).
+
+### 10.2 Nota sobre a evidência da fase intermediária
+
+As capturas de tela abaixo (`print-terminal.jpg`, `print-actions.jpg`) foram
+anexadas durante a fase intermediária do projeto como evidência da suíte de
+testes e do pipeline de CI.
+
+Na revisão para a entrega final, identificou-se que essas evidências
+refletiam um estado parcial do projeto:
+
+- `print-terminal.jpg` mostra a execução de **1 teste único**
+  (`UnitTest1.Teste_Inicial_Deve_Passar`, um teste placeholder sem asserção
+  de negócio real) rodado diretamente contra
+  `tests/FlowCenter.Tests.csproj`, não contra a solução completa.
+- `print-actions.jpg` mostra o pipeline de CI com status "Success", mas o
+  comando usado pelo workflow (`dotnet test FlowCenter.sln`) não exibia
+  nenhuma contagem de testes — sintoma de um GUID corrompido no
+  `FlowCenter.sln` que fazia o projeto de testes ser ignorado pela solução.
+  O pipeline reportava sucesso sem de fato executar a suíte.
+
+Ambos os problemas (teste placeholder sem cobertura real e GUID corrompido
+no `.sln`) foram corrigidos antes da entrega final — ver `pontosConflitantes.MD`
+na raiz do repositório para o detalhamento completo. As imagens foram
+mantidas aqui como registro histórico do processo, não como evidência válida
+do estado final.
+
+![Execução de teste único na fase intermediária](assets/print-terminal.jpg)
+![Pipeline de CI na fase intermediária](assets/print-actions.jpg)

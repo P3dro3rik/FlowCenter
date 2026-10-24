@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FlowCenter.Application\FlowCenter.Application.csproj" />
     <ProjectReference Include="..\FlowCenter.Domain\FlowCenter.Domain.csproj" />
+    <ProjectReference Include="..\FlowCenter.Application\FlowCenter.Application.csproj" />
   </ItemGroup>
 
 </Project>
