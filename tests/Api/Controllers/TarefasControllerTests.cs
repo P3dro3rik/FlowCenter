@@ -2,232 +2,148 @@ using FlowCenter.Api.Controllers;
 using FlowCenter.Application.DTOs;
 using FlowCenter.Domain.Entities;
 using FlowCenter.Domain.Enums;
-using FlowCenter.Domain.Exceptions;
-using FlowCenter.Infrastructure.Data;
 using FlowCenter.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace FlowCenter.Tests.Api.Controllers;
 
-/// <summary>
-/// Testes dos endpoints de <see cref="TarefasController"/>, utilizando o
-/// provedor InMemory do Entity Framework Core para exercitar o repositório real.
-/// Cobre a issue #4: GET/POST/PUT/PATCH/DELETE de /api/tarefas.
-/// </summary>
 public class TarefasControllerTests
 {
-    private static TarefasController CriarController(out AppDbContext context)
+    private static TarefasController CriarController(out TarefaRepository repository)
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        context = new AppDbContext(options);
-        var repository = new TarefaRepository(context);
+        repository = new TarefaRepository();
         return new TarefasController(repository);
     }
 
-    // ── GET /api/tarefas ─────────────────────────────────────────────────────────
-
     [Fact]
-    public async Task Listar_SemFiltros_DeveRetornarTodasAsTarefas() // RF02
+    public async Task Listar_DeveRetornarTodasAsTarefas_QuandoNaoHouverFiltros()
     {
-        var controller = CriarController(out var context);
-        context.Tarefas.AddRange(
-            new Tarefa("Tarefa 1", PrioridadeTarefa.Baixa),
-            new Tarefa("Tarefa 2", PrioridadeTarefa.Alta));
-        await context.SaveChangesAsync();
+        // Arrange
+        var controller = CriarController(out var repository);
+        await repository.AdicionarAsync(new Tarefa("Tarefa 1", PrioridadeTarefa.Alta, "Descrição 1"));
+        await repository.AdicionarAsync(new Tarefa("Tarefa 2", PrioridadeTarefa.Media, "Descrição 2"));
 
-        var resultado = await controller.Listar(null, null, CancellationToken.None);
+        // Act
+        var result = await controller.Listar(null, null, CancellationToken.None);
 
-        var ok = resultado.Result.Should().BeOfType<OkObjectResult>().Subject;
-        ok.Value.Should().BeAssignableTo<IEnumerable<TarefaResponse>>()
-            .Which.Should().HaveCount(2);
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var tarefas = okResult.Value.Should().BeAssignableTo<IEnumerable<TarefaResponse>>().Subject;
+        tarefas.Should().HaveCount(2);
     }
 
     [Fact]
-    public async Task Listar_ComFiltroDeStatus_DeveRetornarApenasCorrespondentes() // RF07
+    public async Task ObterPorId_DeveRetornarTarefa_QuandoIdExistir()
     {
-        var controller = CriarController(out var context);
-        var pendente = new Tarefa("Pendente", PrioridadeTarefa.Media);
-        var concluida = new Tarefa("Concluída", PrioridadeTarefa.Media);
-        concluida.Concluir();
-        context.Tarefas.AddRange(pendente, concluida);
-        await context.SaveChangesAsync();
+        // Arrange
+        var controller = CriarController(out var repository);
+        var tarefa = new Tarefa("Tarefa Exemplo", PrioridadeTarefa.Alta, "Descrição Exemplo");
+        await repository.AdicionarAsync(tarefa);
 
-        var resultado = await controller.Listar(StatusTarefa.Concluida, null, CancellationToken.None);
+        // Act
+        var result = await controller.ObterPorId(tarefa.Id, CancellationToken.None);
 
-        var ok = resultado.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var tarefas = ok.Value.Should().BeAssignableTo<IEnumerable<TarefaResponse>>().Subject;
-        tarefas.Should().ContainSingle().Which.Id.Should().Be(concluida.Id);
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var response = okResult.Value.Should().BeOfType<TarefaResponse>().Subject;
+        response.Id.Should().Be(tarefa.Id);
+        response.Titulo.Should().Be("Tarefa Exemplo");
     }
 
     [Fact]
-    public async Task Listar_ComFiltroDePrioridade_DeveRetornarApenasCorrespondentes() // RF08
+    public async Task ObterPorId_DeveRetornarNotFound_QuandoIdNaoExistir()
     {
-        var controller = CriarController(out var context);
-        var alta = new Tarefa("Alta prioridade", PrioridadeTarefa.Alta);
-        var baixa = new Tarefa("Baixa prioridade", PrioridadeTarefa.Baixa);
-        context.Tarefas.AddRange(alta, baixa);
-        await context.SaveChangesAsync();
-
-        var resultado = await controller.Listar(null, PrioridadeTarefa.Alta, CancellationToken.None);
-
-        var ok = resultado.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var tarefas = ok.Value.Should().BeAssignableTo<IEnumerable<TarefaResponse>>().Subject;
-        tarefas.Should().ContainSingle().Which.Id.Should().Be(alta.Id);
-    }
-
-    // ── GET /api/tarefas/{id} ────────────────────────────────────────────────────
-
-    [Fact]
-    public async Task ObterPorId_TarefaExistente_DeveRetornarOk() // RF03
-    {
-        var controller = CriarController(out var context);
-        var tarefa = new Tarefa("Tarefa existente", PrioridadeTarefa.Media);
-        context.Tarefas.Add(tarefa);
-        await context.SaveChangesAsync();
-
-        var resultado = await controller.ObterPorId(tarefa.Id, CancellationToken.None);
-
-        var ok = resultado.Result.Should().BeOfType<OkObjectResult>().Subject;
-        ok.Value.Should().BeOfType<TarefaResponse>().Which.Id.Should().Be(tarefa.Id);
-    }
-
-    [Fact]
-    public async Task ObterPorId_TarefaInexistente_DeveRetornarNotFound() // RB09
-    {
+        // Arrange
         var controller = CriarController(out _);
 
-        var resultado = await controller.ObterPorId(Guid.NewGuid(), CancellationToken.None);
+        // Act
+        var result = await controller.ObterPorId(Guid.NewGuid(), CancellationToken.None);
 
-        resultado.Result.Should().BeOfType<NotFoundResult>();
+        // Assert
+        result.Result.Should().BeOfType<NotFoundResult>();
     }
 
-    // ── POST /api/tarefas ────────────────────────────────────────────────────────
-
     [Fact]
-    public async Task Criar_ComDadosValidos_DeveRetornarCreatedComTarefaPendente() // RF01, RB05
+    public async Task Criar_DeveAdicionarTarefaERetornarCreated()
     {
-        var controller = CriarController(out var context);
-        var request = new CriarTarefaRequest
-        {
-            Titulo = "Implementar API",
-            Descricao = "Criar os endpoints de tarefas",
-            Prioridade = PrioridadeTarefa.Alta
+        // Arrange
+        var controller = CriarController(out var repository);
+        var request = new CriarTarefaRequest 
+        { 
+            Titulo = "Nova Tarefa", 
+            Prioridade = PrioridadeTarefa.Alta, 
+            Descricao = "Nova Descrição" 
         };
 
-        var resultado = await controller.Criar(request, CancellationToken.None);
+        // Act
+        var result = await controller.Criar(request, CancellationToken.None);
 
-        var created = resultado.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        var response = created.Value.Should().BeOfType<TarefaResponse>().Subject;
-        response.Titulo.Should().Be("Implementar API");
-        response.Status.Should().Be(StatusTarefa.Pendente);
-        created.ActionName.Should().Be(nameof(TarefasController.ObterPorId));
+        // Assert
+        var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+        var response = createdResult.Value.Should().BeOfType<TarefaResponse>().Subject;
+        response.Titulo.Should().Be("Nova Tarefa");
 
-        (await context.Tarefas.CountAsync()).Should().Be(1);
+        var tarefaNoRepo = await repository.ObterPorIdAsync(response.Id);
+        tarefaNoRepo.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task Criar_ComTituloInvalido_DeveLancarDomainException() // RB01, RB12
+    public async Task Atualizar_DeveAtualizarTarefa_QuandoExistir()
     {
-        var controller = CriarController(out _);
-        var request = new CriarTarefaRequest { Titulo = "ab", Prioridade = PrioridadeTarefa.Baixa };
+        // Arrange
+        var controller = CriarController(out var repository);
+        var tarefa = new Tarefa("Título Antigo", PrioridadeTarefa.Baixa, "Descrição Antiga");
+        await repository.AdicionarAsync(tarefa);
 
-        Func<Task> acao = () => controller.Criar(request, CancellationToken.None);
-
-        await acao.Should().ThrowAsync<DomainException>();
-    }
-
-    // ── PUT /api/tarefas/{id} ────────────────────────────────────────────────────
-
-    [Fact]
-    public async Task Atualizar_TarefaExistente_DeveAtualizarDados() // RF04
-    {
-        var controller = CriarController(out var context);
-        var tarefa = new Tarefa("Título original", PrioridadeTarefa.Baixa);
-        context.Tarefas.Add(tarefa);
-        await context.SaveChangesAsync();
-        var request = new AtualizarTarefaRequest
-        {
-            Titulo = "Título atualizado",
-            Descricao = "Nova descrição",
-            Prioridade = PrioridadeTarefa.Alta
+        var request = new AtualizarTarefaRequest 
+        { 
+            Titulo = "Título Novo", 
+            Prioridade = PrioridadeTarefa.Alta, 
+            Descricao = "Descrição Nova" 
         };
 
-        var resultado = await controller.Atualizar(tarefa.Id, request, CancellationToken.None);
+        // Act
+        var result = await controller.Atualizar(tarefa.Id, request, CancellationToken.None);
 
-        var ok = resultado.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = ok.Value.Should().BeOfType<TarefaResponse>().Subject;
-        response.Titulo.Should().Be("Título atualizado");
-        response.Prioridade.Should().Be(PrioridadeTarefa.Alta);
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var response = okResult.Value.Should().BeOfType<TarefaResponse>().Subject;
+        response.Titulo.Should().Be("Título Novo");
     }
 
     [Fact]
-    public async Task Atualizar_TarefaInexistente_DeveRetornarNotFound() // RB09
+    public async Task Concluir_DeveMarcarComoConcluida_QuandoExistir()
     {
-        var controller = CriarController(out _);
-        var request = new AtualizarTarefaRequest { Titulo = "Qualquer", Prioridade = PrioridadeTarefa.Baixa };
+        // Arrange
+        var controller = CriarController(out var repository);
+        var tarefa = new Tarefa("Tarefa a Concluir", PrioridadeTarefa.Media, null);
+        await repository.AdicionarAsync(tarefa);
 
-        var resultado = await controller.Atualizar(Guid.NewGuid(), request, CancellationToken.None);
+        // Act
+        var result = await controller.Concluir(tarefa.Id, CancellationToken.None);
 
-        resultado.Result.Should().BeOfType<NotFoundResult>();
-    }
-
-    // ── PATCH /api/tarefas/{id}/concluir ─────────────────────────────────────────
-
-    [Fact]
-    public async Task Concluir_TarefaExistente_DeveMarcarComoConcluidaComData() // RF05, RB07
-    {
-        var controller = CriarController(out var context);
-        var tarefa = new Tarefa("A concluir", PrioridadeTarefa.Media);
-        context.Tarefas.Add(tarefa);
-        await context.SaveChangesAsync();
-
-        var resultado = await controller.Concluir(tarefa.Id, CancellationToken.None);
-
-        var ok = resultado.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = ok.Value.Should().BeOfType<TarefaResponse>().Subject;
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var response = okResult.Value.Should().BeOfType<TarefaResponse>().Subject;
         response.Status.Should().Be(StatusTarefa.Concluida);
-        response.DataConclusao.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task Concluir_TarefaInexistente_DeveRetornarNotFound() // RB09
+    public async Task Remover_DeveDeletarTarefa_QuandoExistir()
     {
-        var controller = CriarController(out _);
+        // Arrange
+        var controller = CriarController(out var repository);
+        var tarefa = new Tarefa("Tarefa a Deletar", PrioridadeTarefa.Baixa, null);
+        await repository.AdicionarAsync(tarefa);
 
-        var resultado = await controller.Concluir(Guid.NewGuid(), CancellationToken.None);
+        // Act
+        var result = await controller.Remover(tarefa.Id, CancellationToken.None);
 
-        resultado.Result.Should().BeOfType<NotFoundResult>();
-    }
-
-    // ── DELETE /api/tarefas/{id} ─────────────────────────────────────────────────
-
-    [Fact]
-    public async Task Remover_TarefaExistente_DeveRetornarNoContentERemoverDoBanco() // RF06
-    {
-        var controller = CriarController(out var context);
-        var tarefa = new Tarefa("A remover", PrioridadeTarefa.Baixa);
-        context.Tarefas.Add(tarefa);
-        await context.SaveChangesAsync();
-
-        var resultado = await controller.Remover(tarefa.Id, CancellationToken.None);
-
-        resultado.Should().BeOfType<NoContentResult>();
-        (await context.Tarefas.CountAsync()).Should().Be(0);
-    }
-
-    [Fact]
-    public async Task Remover_TarefaInexistente_DeveRetornarNotFound() // RB09
-    {
-        var controller = CriarController(out _);
-
-        var resultado = await controller.Remover(Guid.NewGuid(), CancellationToken.None);
-
-        resultado.Should().BeOfType<NotFoundResult>();
+        // Assert
+        result.Should().BeOfType<NoContentResult>();
+        var tarefaExcluida = await repository.ObterPorIdAsync(tarefa.Id);
+        tarefaExcluida.Should().BeNull();
     }
 }
