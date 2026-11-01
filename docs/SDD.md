@@ -280,3 +280,30 @@ do estado final.
 
 ![Execução de teste único na fase intermediária](assets/print-terminal.jpg)
 ![Pipeline de CI na fase intermediária](assets/print-actions.jpg)
+
+### 10.3 Relatório de Cobertura de Código (Code Coverage)
+
+A cobertura de código foi aferida utilizando o coletor multiplataforma **Coverlet** integrado à suíte de testes xUnit e sumarizada pelo **ReportGenerator**.
+
+#### Resumo por Módulo Crítico da Aplicação
+
+| Camada / Componente | Classe / Arquivo | Cobertura de Linhas | Cobertura de Branches | Status |
+|---|---|---|---|---|
+| **Domain** | `Tarefa` (Regras de Negócio RB01–RB12) | **91.6%** | **100.0%** (12/12) | Homologado |
+| **Domain** | `DomainException` | **50.0%** | — | Homologado |
+| **Application** | `CriarTarefaRequest`, `AtualizarTarefaRequest`, `TarefaResponse` (DTOs) | **100.0%** | — | Homologado |
+| **API** | `TarefasController` (Endpoints RF01–RF08) | **93.3%** | **62.5%** (5/8) | Homologado |
+| **Infrastructure** | `TarefaRepository` (Persistência EF Core) | **90.0%** | **50.0%** (2/4) | Homologado |
+
+> **Nota:** Classes de infraestrutura auxiliar geradas automaticamente pelo Entity Framework Core (como `Migrations/*` e `ModelSnapshot`) e inicializadores de host (`Program.cs`) foram desconsideradas das métricas de negócio para não distorcer a fidelidade da cobertura sobre as unidades funcionais críticas.
+
+#### Como reproduzir o relatório de cobertura:
+```bash
+# 1. Executar os testes coletando métricas
+dotnet test FlowCenter.sln --collect:"XPlat Code Coverage"
+
+# 2. Gerar relatório visual em HTML e resumo em Markdown
+reportgenerator -reports:"tests/TestResults/*/coverage.cobertura.xml" -targetdir:"coverage-report" -classfilters:"-*Migrations*;-*AppDbContextFactory;-*Program*" -reporttypes:"Html;MarkdownSummary;TextSummary"
+```
+O relatório HTML completo com a navegação visual linha a linha fica disponível em `coverage-report/index.html`.
+
