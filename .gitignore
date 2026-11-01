@@ -12,6 +12,7 @@ out/
 
 # Testes
 [Tt]est[Rr]esult*/
+coverage-report/
 *.trx
 *.coverage
 *.coveragexml
